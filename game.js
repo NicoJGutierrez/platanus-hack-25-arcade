@@ -8,8 +8,13 @@ let leadTimer = 0;
 const leadThreshold = 2000; // puntos
 const leadDuration = 30000; // ms (30s)
 let difficultyMultiplier = 1.0;
+// visual note size
+let noteWidth = 64;
 let labelTexts1 = [];
 let labelTexts2 = [];
+// separator between players
+const separatorWidth = 36;
+let halfWidth;
 function create() {
   const s = this;
   // reset runtime state (useful when scene restarts)
@@ -22,7 +27,8 @@ function create() {
   leadTimer = 0;
   running = true;
   g = s.add.graphics();
-  laneW = cfg.width / 2 / lanes;
+  halfWidth = (cfg.width - separatorWidth) / 2;
+  laneW = halfWidth / lanes;
 
   // UI
   scoreText1 = s.add.text(16, 16, 'P1: 0', { font: '20px Arial', fill: '#66ff66' });
@@ -59,7 +65,7 @@ function create() {
   for (let i = 0; i < lanes; i++) {
     const x1 = i * laneW + laneW / 2;
     labelTexts1[i] = s.add.text(x1, labelY, keysP1[i], { font: '18px Arial', fill: '#99ff99' }).setOrigin(0.5, 0.5);
-    const x2 = cfg.width / 2 + i * laneW + laneW / 2;
+    const x2 = halfWidth + separatorWidth + i * laneW + laneW / 2;
     labelTexts2[i] = s.add.text(x2, labelY, keysP2[i], { font: '18px Arial', fill: '#99ddff' }).setOrigin(0.5, 0.5);
   }
 }
@@ -69,7 +75,8 @@ function spawn(arr, side) {
   if (!running) return;
   if (Math.random() > 0.75) return; // sparse notes
   const lane = Math.floor(Math.random() * lanes);
-  const x = (side === 0 ? 0 : cfg.width / 2) + lane * laneW + laneW / 2 - 12;
+  const baseX = side === 0 ? 0 : halfWidth + separatorWidth;
+  const x = baseX + lane * laneW + laneW / 2 - Math.floor(noteWidth / 2);
   arr.push({ x: x, y: -30, lane: lane, side: side, hit: false });
 }
 
@@ -100,19 +107,31 @@ function draw() {
   g.clear();
   // background lanes
   for (let side = 0; side < 2; side++) {
-    const baseX = side === 0 ? 0 : cfg.width / 2;
+    const baseX = side === 0 ? 0 : halfWidth + separatorWidth;
     for (let i = 0; i < lanes; i++) {
       const x = baseX + i * laneW;
       g.fillStyle(0x0b2540, 1); g.fillRect(x, 60, laneW - 4, cfg.height - 140);
-      g.lineStyle(2, 0x163b54, 1); g.strokeRect(x, 60, laneW - 4, cfg.height - 140);
+      // no stroke to avoid an artifact line
     }
     // draw hit line
-    g.fillStyle(side === 0 ? 0x113322 : 0x112233, 0.25); g.fillRect(baseX, hitY, cfg.width / 2, 6);
+    g.fillStyle(side === 0 ? 0x113322 : 0x112233, 0.25); g.fillRect(baseX, hitY, halfWidth, 6);
+  }
+
+  // separator lane in the middle (filled only — no stroke to avoid artifact line)
+  g.fillStyle(0x081424, 1); g.fillRect(halfWidth, 60, separatorWidth, cfg.height - 140);
+
+  // aesthetic hit bars for each player's lanes (just below hit line)
+  const barY = hitY + 8;
+  for (let i = 0; i < lanes; i++) {
+    const bx1 = 0 + i * laneW + 4;
+    g.fillStyle(0x003300, 0.6); g.fillRect(bx1, barY, Math.max(8, laneW - 8), 10);
+    const bx2 = halfWidth + separatorWidth + i * laneW + 4;
+    g.fillStyle(0x002244, 0.6); g.fillRect(bx2, barY, Math.max(8, laneW - 8), 10);
   }
 
   // notes
-  notes1.forEach(n => { g.fillStyle(0xffcc33, 1); g.fillRect(n.x, n.y, 24, 20); });
-  notes2.forEach(n => { g.fillStyle(0x66ccff, 1); g.fillRect(n.x, n.y, 24, 20); });
+  notes1.forEach(n => { g.fillStyle(0xffcc33, 1); g.fillRect(n.x, n.y, noteWidth, 20); });
+  notes2.forEach(n => { g.fillStyle(0x66ccff, 1); g.fillRect(n.x, n.y, noteWidth, 20); });
 }
 
 function handleKey(k) {
