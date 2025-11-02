@@ -72,7 +72,8 @@ function gameCreate() {
   s.input.keyboard.on('keydown', (ev) => {
     if (!running) { if (ev.key.toLowerCase() === 'r') s.scene.restart(); return; }
     keysDown[ev.key.toLowerCase()] = true;
-    handleKey(ev.key);
+    checkMultiHits(notes1, 0);
+    if (!singlePlayer) checkMultiHits(notes2, 1);
   });
   s.input.keyboard.on('keyup', (ev) => {
     keysDown[ev.key.toLowerCase()] = false;
@@ -159,10 +160,6 @@ function gameUpdate(_, dt) {
   // move notes
   [notes1, notes2].forEach(arr => { for (let i = arr.length - 1; i >= 0; i--) { arr[i].y += speed * s; if (arr[i].y > cfg.height + 50) arr.splice(i, 1); } });
 
-  // check hits for multi-notes
-  checkMultiHits(notes1, 0);
-  if (!singlePlayer) checkMultiHits(notes2, 1);
-
   // comprobar ventaja sostenida
   const diff = Math.abs(score1 - score2);
   if (diff > leadThreshold) {
@@ -226,38 +223,53 @@ function draw() {
 }
 
 function checkMultiHits(arr, side) {
-  for (let i = arr.length - 1; i >= 0; i--) {
+  // Determine pressed lanes
+  const map = side === 0 ? { a: 0, s: 1, d: 2, f: 3 } : { h: 0, j: 1, k: 2, l: 3 };
+  const pressedLanes = new Set();
+  for (let k in map) {
+    if (keysDown[k]) pressedLanes.add(map[k]);
+  }
+
+  // Find candidate notes: within range and all lanes pressed
+  const candidates = [];
+  for (let i = 0; i < arr.length; i++) {
     const n = arr[i];
     if (n.hit) continue;
     const d = Math.abs(n.y - hitY);
-    if (d > 30) continue; // slightly less delay, allow a bit early too
-    // check if all lanes are pressed
-    const map = side === 0 ? { a: 0, s: 1, d: 2, f: 3 } : { h: 0, j: 1, k: 2, l: 3 };
-    let allPressed = true;
-    for (let lane of n.lanes) {
-      let keyPressed = false;
-      for (let k in map) {
-        if (map[k] === lane && keysDown[k]) {
-          keyPressed = true;
-          break;
-        }
-      }
-      if (!keyPressed) {
-        allPressed = false;
-        break;
-      }
-    }
-    if (allPressed) {
-      // hit
-      const perfect = d < 12;
-      const points = perfect ? 100 * n.lanes.length : 50 * n.lanes.length;
-      if (side === 0) score1 += points; else score2 += points;
-      playToneForSide(side, perfect ? 880 : 660, 0.08);
-      if (side === 0) scoreText1.setText('P1: ' + score1); else scoreText2.setText('P2: ' + score2);
-      n.hit = true;
-      arr.splice(i, 1);
+    if (d > 60) continue;
+    const allLanesPressed = n.lanes.every(lane => pressedLanes.has(lane));
+    if (allLanesPressed) {
+      candidates.push({ index: i, d: d, note: n });
     }
   }
+
+  // If no candidates, do nothing
+  if (candidates.length === 0) return;
+
+  // Find the closest candidate
+  candidates.sort((a, b) => a.d - b.d);
+  const closest = candidates[0];
+  const n = closest.note;
+  const i = closest.index;
+
+  // Hit the closest note
+  let points;
+  let toneFreq;
+  if (closest.d <= 12) {
+    points = 100 * n.lanes.length; // perfect
+    toneFreq = 880;
+  } else if (closest.d <= 30) {
+    points = 50 * n.lanes.length; // normal
+    toneFreq = 660;
+  } else {
+    points = 25 * n.lanes.length; // bad hit
+    toneFreq = 220; // lower tone for error
+  }
+  if (side === 0) score1 += points; else score2 += points;
+  playToneForSide(side, toneFreq, 0.08);
+  if (side === 0) scoreText1.setText('P1: ' + score1); else if (!singlePlayer) scoreText2.setText('P2: ' + score2);
+  n.hit = true;
+  arr.splice(i, 1);
 }
 
 function checkHit(arr, lane, side) {

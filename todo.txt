@@ -1,5 +1,6 @@
-haz que el juego permita leer una lista de elementos (tiempo, frecuencia, cambio), donde el tiempo sea la cantidad de tiempo que pasó desde la nota anterior, la frecuencia sea la nota musical que se toca y el cambio indique si:
-- la nota es igual a la anterior
-- la nota cambia de carril
-- la nota es doble
-- la nota es triple
+haz que, para el modo de un solo jugador, el juego lea una lista de elementos de la forma (tiempo, frecuencia, cambio), donde el tiempo sea la cantidad de tiempo que debe pasar entre la nota anterior y esta, la frecuencia sea la nota musical que se toca cuando la nota se consigue bien o perfecto, y "cambio" indique si:
+1 - la nota se mantiene en el mismo carril que la anterior
+2 - la nota cambia de carril
+3 - la nota es doble
+4 - la nota es triple
+al haber desaparecido la última nota de esta lista de elementos, el juego debe decir "you win" si el jugador obtuvo más de la mitad de los puntos y debe decir "perfect clear" si el jugador obtuvo más del 95% de los puntos. de otro modo debe decir "you lose"
