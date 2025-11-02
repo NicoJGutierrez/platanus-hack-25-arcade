@@ -45,6 +45,8 @@ let keysDown = {};
 const baseMultiProb = 0.1;
 // game mode
 let singlePlayer = false;
+// max possible score for single player simulation
+let maxPossibleScore = 0;
 function gameCreate() {
   const s = this;
   // reset runtime state (useful when scene restarts)
@@ -56,6 +58,7 @@ function gameCreate() {
   difficultyMultiplier = 1.0;
   leadTimer = 0;
   running = true;
+  maxPossibleScore = 0;
   g = s.add.graphics();
   halfWidth = (cfg.width - separatorWidth) / 2;
   laneW = halfWidth / lanes;
@@ -150,6 +153,7 @@ function spawn(arr, side, isMulti = false, count = 2) {
   // for multi, center on the first lane, but draw each
   const x = baseX + lanesForNote[0] * laneW + laneW / 2 - Math.floor(noteWidth / 2);
   arr.push({ x: x, y: -30, lanes: lanesForNote, side: side, hit: false });
+  maxPossibleScore += 100 * lanesForNote.length;
 }
 
 function gameUpdate(_, dt) {
@@ -160,8 +164,13 @@ function gameUpdate(_, dt) {
   // move notes
   [notes1, notes2].forEach(arr => { for (let i = arr.length - 1; i >= 0; i--) { arr[i].y += speed * s; if (arr[i].y > cfg.height + 50) arr.splice(i, 1); } });
 
+  // update simulated score2 for single player
+  if (singlePlayer) {
+    score2 = Math.floor(0.9 * maxPossibleScore);
+  }
+
   // comprobar ventaja sostenida
-  const diff = Math.abs(score1 - score2);
+  const diff = singlePlayer ? (score2 - score1) : Math.abs(score1 - score2);
   if (diff > leadThreshold) {
     leadTimer += dt;
     if (leadTimer >= leadDuration) {
@@ -259,7 +268,7 @@ function checkMultiHits(arr, side) {
     points = 100 * n.lanes.length; // perfect
     toneFreq = 880;
   } else if (closest.d <= 30) {
-    points = 50 * n.lanes.length; // normal
+    points = 80 * n.lanes.length; // normal
     toneFreq = 660;
   } else {
     points = 5 * n.lanes.length; // bad hit
@@ -280,9 +289,9 @@ function endSong(s) {
   // evitar ejecutar dos veces
   if (!running) return;
   running = false; const overlay = s.add.graphics(); overlay.fillStyle(0x000000, 0.6); overlay.fillRect(0, 0, cfg.width, cfg.height);
-  const winner = singlePlayer ? (score1 > 0 ? 'YOU WIN!' : 'GAME OVER') : (score1 === score2 ? 'TIE' : (score1 > score2 ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS'));
+  const winner = singlePlayer ? (score1 >= score2 ? 'YOU WIN!' : 'GAME OVER') : (score1 === score2 ? 'TIE' : (score1 > score2 ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS'));
   endText = s.add.text(cfg.width / 2, 270, winner, { font: '40px Arial', fill: '#ffffff' }).setOrigin(0.5);
-  const scoreText = singlePlayer ? 'Score: ' + score1 : 'P1: ' + score1 + '   P2: ' + score2;
+  const scoreText = singlePlayer ? 'Score: ' + score1 + ' / ' + score2 : 'P1: ' + score1 + '   P2: ' + score2;
   s.add.text(cfg.width / 2, 330, scoreText, { font: '26px Arial', fill: '#ffd966' }).setOrigin(0.5);
   s.add.text(cfg.width / 2, 390, 'Press R to Restart', { font: '20px Arial', fill: '#99ff99' }).setOrigin(0.5);
   playToneForSide(0, 440, 0.2); playToneForSide(1, 330, 0.2);
