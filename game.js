@@ -236,7 +236,7 @@ function checkMultiHits(arr, side) {
     const n = arr[i];
     if (n.hit) continue;
     const d = Math.abs(n.y - hitY);
-    if (d > 60) continue;
+    if (d > 45) continue;
     const allLanesPressed = n.lanes.every(lane => pressedLanes.has(lane));
     if (allLanesPressed) {
       candidates.push({ index: i, d: d, note: n });
@@ -262,7 +262,7 @@ function checkMultiHits(arr, side) {
     points = 50 * n.lanes.length; // normal
     toneFreq = 660;
   } else {
-    points = 25 * n.lanes.length; // bad hit
+    points = 5 * n.lanes.length; // bad hit
     toneFreq = 220; // lower tone for error
   }
   if (side === 0) score1 += points; else score2 += points;
