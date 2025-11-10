@@ -14,7 +14,7 @@ def main():
         description='Convert MIDI file to beatmap for rhythm game')
     parser.add_argument('midi_file', help='Path to MIDI file')
     parser.add_argument('--channels', nargs='+', type=int,
-                        default=[0, 1, 5], help='Channels to include (default: 4)')
+                        default=[4], help='Channels to include (default: 0, 1, 5)')
     parser.add_argument(
         '--output', default='beatmap_output.txt', help='Output file')
     args = parser.parse_args()
