@@ -29,20 +29,40 @@ const menuScene = {
       });
     };
 
-    // Keyboard controls
-    s.input.keyboard.on('keydown-SPACE', () => {
+    s.input.keyboard.on('keydown-ENTER', () => {
       if (selectedIndex === 0) {
         singlePlayer = false;
         beatmapDuel = false;
         s.scene.start('Game');
-      }
-    });
-    s.input.keyboard.on('keydown-ENTER', () => {
-      if (selectedIndex === 1) {
+      } else if (selectedIndex === 1) {
         singlePlayer = true;
         beatmapDuel = false;
         s.scene.start('Game');
+      } else if (selectedIndex === 2) {
+        singlePlayer = false;
+        beatmapDuel = true;
+        s.scene.start('Game');
       }
+    });
+
+    // Note keys can also select any option
+    const noteKeys = ['a', 's', 'd', 'f', 'h', 'j', 'k', 'l'];
+    noteKeys.forEach(key => {
+      s.input.keyboard.on('keydown-' + key.toUpperCase(), () => {
+        if (selectedIndex === 0) {
+          singlePlayer = false;
+          beatmapDuel = false;
+          s.scene.start('Game');
+        } else if (selectedIndex === 1) {
+          singlePlayer = true;
+          beatmapDuel = false;
+          s.scene.start('Game');
+        } else if (selectedIndex === 2) {
+          singlePlayer = false;
+          beatmapDuel = true;
+          s.scene.start('Game');
+        }
+      });
     });
     s.input.keyboard.on('keydown-UP', () => {
       selectedIndex = Math.max(0, selectedIndex - 1);
@@ -197,6 +217,10 @@ function gameCreate() {
   s.input.keyboard.on('keydown-ESC', () => {
     s.scene.start('Menu');
   });
+  // Also allow arcade button P1Y to return to menu (mapped to ESC)
+  s.input.keyboard.on('keydown-START2', () => {
+    s.scene.start('Menu');
+  });
 
   if (singlePlayer) {
     // calculate total possible score
@@ -210,7 +234,8 @@ function gameCreate() {
       if (index >= beatmap.length) return;
       const [time, freq, change] = beatmap[index];
       s.time.delayedCall(time, () => {
-        spawnBeatmapNote(freq, change);
+        spawnBeatmapNoteForPlayer(freq, change, 0, lastLane);
+        if (change === 2) lastLane = Math.floor(Math.random() * lanes);
         beatmapIndex = index + 1;
         scheduleBeatmapNote(index + 1);
       });
@@ -550,3 +575,81 @@ function playSingleTone(ctx, freq, dur) {
 // Initialize beatmaps for duel mode (using the same beatmap for both players for now)
 beatmap1.push(...beatmap);
 beatmap2.push(...beatmap);
+
+// Test beatmaps - simple sequences for testing
+if (beatmap.length === 0) {
+  // Simple test beatmap for single player
+  beatmap.push(
+    [500, 261.63, 2],   // C4 - change lane
+    [500, 293.66, 2],   // D4 - change lane  
+    [500, 329.63, 2],   // E4 - change lane
+    [500, 349.23, 2],   // F4 - change lane
+    [500, 392.00, 2],   // G4 - change lane
+    [500, 440.00, 2],   // A4 - change lane
+    [500, 493.88, 2],   // B4 - change lane
+    [500, 523.25, 1],   // C5 - same lane
+    [500, [523.25, 659.25], 3], // C5 + E5 - double
+    [500, [587.33, 783.99], 3], // D5 + G5 - double
+    [500, [659.25, 880.00], 3], // E5 + A5 - double
+    [500, [698.46, 932.33], 3], // F5 + A#5 - double
+    [500, [783.99, 1046.50], 3], // G5 + C6 - double
+    [500, [880.00, 1174.66], 3], // A5 + D6 - double
+    [500, [987.77, 1318.51], 3], // B5 + E6 - double
+    [500, [1046.50, 1396.91], 3], // C6 + F6 - double
+    [500, [1174.66, 1567.98], 4], // D6 + G6 + B6 - triple
+    [500, [1318.51, 1760.00], 4], // E6 + A6 + C#7 - triple
+    [500, [1396.91, 1864.66], 4], // F6 + A#6 + D7 - triple
+    [500, [1567.98, 2093.00], 4]  // G6 + C7 + E7 - triple
+  );
+}
+
+if (beatmap1.length === 0) {
+  beatmap1.push(
+    [250, 261.63, 2],   // C4 - change lane
+    [500, 293.66, 2],   // D4 - change lane  
+    [500, 329.63, 2],   // E4 - change lane
+    [500, 349.23, 2],   // F4 - change lane
+    [500, 392.00, 2],   // G4 - change lane
+    [500, 440.00, 2],   // A4 - change lane
+    [500, 493.88, 2],   // B4 - change lane
+    [500, 523.25, 1],   // C5 - same lane
+    [500, [523.25, 659.25], 3], // C5 + E5 - double
+    [500, [587.33, 783.99], 3], // D5 + G5 - double
+    [500, [659.25, 880.00], 3], // E5 + A5 - double
+    [500, [698.46, 932.33], 3], // F5 + A#5 - double
+    [500, [783.99, 1046.50], 3], // G5 + C6 - double
+    [500, [880.00, 1174.66], 3], // A5 + D6 - double
+    [500, [987.77, 1318.51], 3], // B5 + E6 - double
+    [500, [1046.50, 1396.91], 3], // C6 + F6 - double
+    [500, [1174.66, 1567.98], 4], // D6 + G6 + B6 - triple
+    [500, [1318.51, 1760.00], 4], // E6 + A6 + C#7 - triple
+    [500, [1396.91, 1864.66], 4], // F6 + A#6 + D7 - triple
+    [500, [1567.98, 2093.00], 4]  // G6 + C7 + E7 - triple
+  );
+}
+
+// Different beatmap for player 2 in duel mode
+if (beatmap2.length === 0) {
+  beatmap2.push(
+    [500, 329.63, 2],   // E4 - change lane
+    [500, 349.23, 2],   // F4 - change lane
+    [500, 392.00, 2],   // G4 - change lane
+    [500, 440.00, 2],   // A4 - change lane
+    [500, 493.88, 2],   // B4 - change lane
+    [500, 523.25, 2],   // C5 - change lane
+    [500, 587.33, 2],   // D5 - change lane
+    [500, 659.25, 1],   // E5 - same lane
+    [500, [659.25, 880.00], 3], // E5 + A5 - double
+    [500, [783.99, 1046.50], 3], // G5 + C6 - double
+    [500, [880.00, 1174.66], 3], // A5 + D6 - double
+    [500, [987.77, 1318.51], 3], // B5 + E6 - double
+    [500, [1046.50, 1396.91], 3], // C6 + F6 - double
+    [500, [1174.66, 1567.98], 3], // D6 + G6 - double
+    [500, [1318.51, 1760.00], 3], // E6 + A6 - double
+    [500, [1396.91, 1864.66], 3], // F6 + A#6 - double
+    [500, [1567.98, 2093.00, 2637.02], 4], // G6 + C7 + E7 - triple
+    [500, [1760.00, 2349.32, 3135.96], 4], // A6 + D7 + F#7 - triple
+    [500, [1864.66, 2489.02, 3322.44], 4], // A#6 + D#7 + G7 - triple
+    [500, [2093.00, 2793.83, 3729.31], 4]  // C7 + F7 + A7 - triple
+  );
+}
