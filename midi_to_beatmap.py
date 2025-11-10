@@ -5,8 +5,8 @@ import argparse
 
 
 def note_to_freq(note):
-    # Convert MIDI note number to frequency in Hz, rounded to 2 decimals
-    return round(440 * (2 ** ((note - 69) / 12)), 2)
+    # Convert MIDI note number to frequency in Hz, rounded without decimals
+    return round(440 * (2 ** ((note - 69) / 12)))
 
 
 def main():
@@ -14,7 +14,7 @@ def main():
         description='Convert MIDI file to beatmap for rhythm game')
     parser.add_argument('midi_file', help='Path to MIDI file')
     parser.add_argument('--channels', nargs='+', type=int,
-                        default=[4], help='Channels to include (default: 0, 1, 5)')
+                        default=[0], help='Channels to include (default: 0, 1, 5)')
     parser.add_argument(
         '--output', default='beatmap_output.txt', help='Output file')
     args = parser.parse_args()
