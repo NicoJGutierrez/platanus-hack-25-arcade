@@ -4,15 +4,81 @@ const menuScene = {
   create: function () {
     const s = this;
     s.add.text(400, 200, 'DUEL RHYTHM', { font: '48px Arial', fill: '#ffd966' }).setOrigin(0.5);
-    s.add.text(400, 300, 'Press SPACE to Start (2 Players)', { font: '24px Arial', fill: '#ffffff' }).setOrigin(0.5);
-    s.add.text(400, 350, 'Press ENTER for Single Player', { font: '20px Arial', fill: '#ffffff' }).setOrigin(0.5);
+
+    // Menu options
+    const options = [
+      '2 Players (Dynamic)',
+      'Single Player (Beatmap)',
+      '2 Players (Beatmap Duel)'
+    ];
+    let selectedIndex = 0;
+
+    const optionTexts = [];
+    options.forEach((option, i) => {
+      const y = 300 + i * 30;
+      const text = s.add.text(400, y, option, {
+        font: '24px Arial',
+        fill: i === selectedIndex ? '#ffd966' : '#ffffff'
+      }).setOrigin(0.5);
+      optionTexts.push(text);
+    });
+
+    const updateSelection = () => {
+      optionTexts.forEach((text, i) => {
+        text.setFill(i === selectedIndex ? '#ffd966' : '#ffffff');
+      });
+    };
+
+    // Keyboard controls
     s.input.keyboard.on('keydown-SPACE', () => {
-      singlePlayer = false;
-      s.scene.start('Game');
+      if (selectedIndex === 0) {
+        singlePlayer = false;
+        beatmapDuel = false;
+        s.scene.start('Game');
+      }
     });
     s.input.keyboard.on('keydown-ENTER', () => {
-      singlePlayer = true;
-      s.scene.start('Game');
+      if (selectedIndex === 1) {
+        singlePlayer = true;
+        beatmapDuel = false;
+        s.scene.start('Game');
+      }
+    });
+    s.input.keyboard.on('keydown-UP', () => {
+      selectedIndex = Math.max(0, selectedIndex - 1);
+      updateSelection();
+    });
+    s.input.keyboard.on('keydown-DOWN', () => {
+      selectedIndex = Math.min(options.length - 1, selectedIndex + 1);
+      updateSelection();
+    });
+
+    // Arcade controls
+    const arcadeKeys = ['p1u', 'p1d', 'p1a', 'start1'];
+    arcadeKeys.forEach(key => {
+      s.input.keyboard.on('keydown-' + key.toUpperCase(), () => {
+        if (key === 'p1u') {
+          selectedIndex = Math.max(0, selectedIndex - 1);
+          updateSelection();
+        } else if (key === 'p1d') {
+          selectedIndex = Math.min(options.length - 1, selectedIndex + 1);
+          updateSelection();
+        } else if (key === 'p1a' || key === 'start1') {
+          if (selectedIndex === 0) {
+            singlePlayer = false;
+            beatmapDuel = false;
+            s.scene.start('Game');
+          } else if (selectedIndex === 1) {
+            singlePlayer = true;
+            beatmapDuel = false;
+            s.scene.start('Game');
+          } else if (selectedIndex === 2) {
+            singlePlayer = false;
+            beatmapDuel = true;
+            s.scene.start('Game');
+          }
+        }
+      });
     });
   }
 };
@@ -45,350 +111,21 @@ let keysDown = {};
 const baseMultiProb = 0.1;
 // game mode
 let singlePlayer = false;
+let beatmapDuel = false;
 // beatmap for single player: [time_ms, frequency_hz, change_type]
-const beatmap = [
-  [0, [196.0, 98.0, 146.83], 3],
-  [1454, [246.94, 349.23, 466.16], 3],
-  [181, [220.0, 293.66, 392.0], 3],
-  [363, [466.16, 349.23, 246.94], 3],
-  [181, [220.0, 293.66, 392.0], 3],
-  [363, [466.16, 246.94, 349.23], 3],
-  [181, [246.94, 293.66, 392.0], 3],
-  [3090, [622.25], 2],
-  [181, [523.25], 2],
-  [727, [466.16], 2],
-  [181, [523.25], 2],
-  [181, [622.25], 2],
-  [363, [523.25], 2],
-  [727, [698.46], 2],
-  [181, [783.99], 2],
-  [363, [622.25], 2],
-  [90, [587.33], 2],
-  [90, [523.25], 2],
-  [727, [392.0], 2],
-  [181, [622.25], 2],
-  [181, [523.25], 2],
-  [363, [466.16], 2],
-  [181, [523.25], 2],
-  [363, [466.16], 2],
-  [181, [523.25], 2],
-  [363, [466.16], 2],
-  [181, [698.46], 2],
-  [181, [622.25], 2],
-  [727, [698.46], 2],
-  [181, [622.25], 2],
-  [363, [523.25], 2],
-  [181, [622.25], 2],
-  [363, [523.25], 2],
-  [181, [622.25], 2],
-  [181, [698.46], 2],
-  [181, [739.99], 2],
-  [181, [783.99], 2],
-  [181, [932.33], 2],
-  [181, [783.99], 2],
-  [909, [932.33], 2],
-  [181, [783.99], 2],
-  [909, [932.33], 2],
-  [181, [783.99], 2],
-  [181, [146.83, 196.0], 2],
-  [181, [174.61, 233.08], 2],
-  [181, [466.16, 622.25], 2],
-  [181, [392.0, 523.25], 2],
-  [727, [349.23, 466.16], 2],
-  [181, [392.0, 523.25], 2],
-  [181, [466.16, 622.25], 2],
-  [363, [392.0, 523.25], 2],
-  [727, [523.25, 698.46], 2],
-  [181, [587.33, 783.99], 2],
-  [363, [466.16, 622.25], 2],
-  [90, [440.0, 587.33], 2],
-  [90, [392.0, 523.25], 2],
-  [727, [293.66, 392.0], 2],
-  [181, [466.16, 622.25], 2],
-  [181, [392.0, 523.25], 2],
-  [363, [349.23, 466.16], 2],
-  [181, [392.0, 523.25], 2],
-  [363, [349.23, 466.16], 2],
-  [181, [392.0, 523.25], 2],
-  [363, [349.23, 466.16], 2],
-  [181, [523.25, 698.46], 2],
-  [181, [466.16, 622.25], 2],
-  [727, [523.25, 698.46], 2],
-  [181, [466.16, 622.25], 2],
-  [363, [392.0, 523.25], 2],
-  [181, [466.16, 622.25], 2],
-  [363, [392.0, 523.25], 2],
-  [181, [466.16, 622.25], 2],
-  [181, [523.25, 698.46], 2],
-  [181, [554.37, 739.99], 2],
-  [181, [587.33, 783.99], 2],
-  [181, [698.46, 932.33], 2],
-  [181, [587.33, 783.99], 2],
-  [909, [698.46, 932.33], 2],
-  [181, [587.33, 783.99], 2],
-  [909, [698.46, 932.33], 2],
-  [181, [783.99, 587.33], 2],
-  [363, [392.0, 466.16], 2],
-  [181, [523.25, 415.3], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [392.0, 466.16], 2],
-  [181, [523.25, 392.0], 2],
-  [363, [392.0, 311.13], 2],
-  [909, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [587.33, 698.46], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [698.46, 587.33], 2],
-  [181, [622.25, 783.99], 2],
-  [363, [783.99, 622.25], 2],
-  [727, [523.25, 622.25], 2],
-  [90, [466.16, 587.33], 2],
-  [90, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 392.0], 2],
-  [181, [523.25, 392.0], 2],
-  [363, [392.0, 311.13], 2],
-  [727, [261.63, 311.13], 2],
-  [90, [311.13, 392.0], 2],
-  [90, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [349.23, 466.16], 2],
-  [181, [293.66, 392.0], 2],
-  [181, [293.66, 349.23], 2],
-  [181, [311.13, 392.0], 2],
-  [181, [233.08, 311.13], 2],
-  [181, [196.0, 261.63], 2],
-  [909, [587.33], 2],
-  [545, [523.25], 2],
-  [90, [587.33], 2],
-  [90, [466.16], 2],
-  [363, [880.0], 2],
-  [272, [698.46], 2],
-  [90, [622.25], 2],
-  [272, [698.46], 2],
-  [90, [783.99], 2],
-  [848, [523.25], 2],
-  [109, [554.37], 2],
-  [132, [587.33], 2],
-  [545, [523.25], 2],
-  [90, [587.33], 2],
-  [90, [466.16], 2],
-  [238, [880.0], 2],
-  [268, [698.46], 2],
-  [310, [1046.5], 2],
-  [878, [523.25], 2],
-  [242, [783.99], 2],
-  [242, [1046.5], 2],
-  [545, [932.33], 2],
-  [90, [830.61], 2],
-  [90, [783.99], 2],
-  [272, [698.46], 2],
-  [272, [783.99], 2],
-  [181, [932.33], 2],
-  [545, [830.61], 2],
-  [90, [783.99], 2],
-  [90, [698.46], 2],
-  [272, [622.25], 2],
-  [272, [698.46], 2],
-  [181, [587.33], 2],
-  [272, [783.99], 2],
-  [90, [783.99], 2],
-  [1090, [349.23, 466.16, 246.94], 3],
-  [181, [293.66, 392.0, 220.0], 3],
-  [363, [349.23, 466.16, 246.94], 3],
-  [181, [293.66, 392.0, 220.0], 3],
-  [363, [349.23, 466.16, 246.94], 3],
-  [181, [293.66, 392.0, 246.94], 3],
-  [181, [622.25], 2],
-  [181, [523.25], 2],
-  [727, [466.16], 2],
-  [181, [523.25], 2],
-  [181, [622.25], 2],
-  [363, [523.25], 2],
-  [727, [698.46], 2],
-  [181, [783.99], 2],
-  [363, [622.25], 2],
-  [90, [587.33], 2],
-  [90, [523.25], 2],
-  [727, [392.0], 2],
-  [181, [622.25], 2],
-  [181, [523.25], 2],
-  [363, [466.16], 2],
-  [181, [523.25], 2],
-  [363, [466.16], 2],
-  [181, [523.25], 2],
-  [363, [466.16], 2],
-  [181, [698.46], 2],
-  [181, [622.25], 2],
-  [727, [698.46], 2],
-  [181, [622.25], 2],
-  [363, [523.25], 2],
-  [181, [622.25], 2],
-  [363, [523.25], 2],
-  [181, [622.25], 2],
-  [181, [698.46], 2],
-  [181, [739.99], 2],
-  [181, [783.99], 2],
-  [181, [932.33], 2],
-  [181, [783.99], 2],
-  [909, [932.33], 2],
-  [181, [783.99], 2],
-  [909, [932.33], 2],
-  [181, [783.99], 2],
-  [181, [146.83, 196.0], 2],
-  [181, [174.61, 233.08], 2],
-  [181, [466.16, 622.25], 2],
-  [181, [392.0, 523.25], 2],
-  [727, [349.23, 466.16], 2],
-  [181, [392.0, 523.25], 2],
-  [181, [466.16, 622.25], 2],
-  [363, [392.0, 523.25], 2],
-  [727, [523.25, 698.46], 2],
-  [181, [587.33, 783.99], 2],
-  [363, [466.16, 622.25], 2],
-  [90, [440.0, 587.33], 2],
-  [90, [392.0, 523.25], 2],
-  [727, [293.66, 392.0], 2],
-  [181, [466.16, 622.25], 2],
-  [181, [392.0, 523.25], 2],
-  [363, [349.23, 466.16], 2],
-  [181, [392.0, 523.25], 2],
-  [363, [349.23, 466.16], 2],
-  [181, [392.0, 523.25], 2],
-  [363, [349.23, 466.16], 2],
-  [181, [523.25, 698.46], 2],
-  [181, [466.16, 622.25], 2],
-  [727, [523.25, 698.46], 2],
-  [181, [466.16, 622.25], 2],
-  [363, [392.0, 523.25], 2],
-  [181, [466.16, 622.25], 2],
-  [363, [392.0, 523.25], 2],
-  [181, [466.16, 622.25], 2],
-  [181, [523.25, 698.46], 2],
-  [181, [554.37, 739.99], 2],
-  [181, [587.33, 783.99], 2],
-  [181, [698.46, 932.33], 2],
-  [181, [587.33, 783.99], 2],
-  [909, [698.46, 932.33], 2],
-  [181, [587.33, 783.99], 2],
-  [909, [698.46, 932.33], 2],
-  [181, [783.99, 587.33], 2],
-  [363, [392.0, 466.16], 2],
-  [181, [523.25, 415.3], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [392.0, 466.16], 2],
-  [181, [523.25, 392.0], 2],
-  [363, [392.0, 311.13], 2],
-  [909, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [587.33, 698.46], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [698.46, 587.33], 2],
-  [181, [622.25, 783.99], 2],
-  [363, [783.99, 622.25], 2],
-  [727, [523.25, 622.25], 2],
-  [90, [466.16, 587.33], 2],
-  [90, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [523.25, 622.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 392.0], 2],
-  [181, [523.25, 392.0], 2],
-  [363, [392.0, 311.13], 2],
-  [727, [261.63, 311.13], 2],
-  [90, [311.13, 392.0], 2],
-  [90, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [466.16, 587.33], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [415.3, 523.25], 2],
-  [181, [349.23, 466.16], 2],
-  [181, [293.66, 392.0], 2],
-  [181, [293.66, 349.23], 2],
-  [181, [311.13, 392.0], 2],
-  [181, [233.08, 311.13], 2],
-  [181, [196.0, 261.63], 2],
-  [909, [587.33], 2],
-  [545, [523.25], 2],
-  [90, [587.33], 2],
-  [90, [466.16], 2],
-  [363, [880.0], 2],
-  [272, [698.46], 2],
-  [90, [622.25], 2],
-  [272, [698.46], 2],
-  [90, [783.99], 2],
-  [848, [523.25], 2],
-  [109, [554.37], 2],
-  [132, [587.33], 2],
-  [545, [523.25], 2],
-  [90, [587.33], 2],
-  [90, [466.16], 2],
-  [238, [880.0], 2],
-  [268, [698.46], 2],
-  [310, [1046.5], 2],
-  [878, [523.25], 2],
-  [242, [783.99], 2],
-  [242, [1046.5], 2],
-  [545, [932.33], 2],
-  [90, [830.61], 2],
-  [90, [783.99], 2],
-  [272, [698.46], 2],
-  [272, [783.99], 2],
-  [181, [932.33], 2],
-  [545, [830.61], 2],
-  [90, [783.99], 2],
-  [90, [698.46], 2],
-  [272, [622.25], 2],
-  [272, [698.46], 2],
-  [181, [587.33], 2],
-  [272, [783.99], 2],
-  [90, [783.99], 2],
-  [1090, [349.23, 466.16, 246.94], 3],
-  [181, [293.66, 392.0, 220.0], 3],
-  [363, [349.23, 466.16, 246.94], 3],
-  [181, [293.66, 392.0, 220.0], 3],
-  [363, [349.23, 466.16, 246.94], 3],
-  [181, [293.66, 392.0, 246.94], 3],
-];
+const beatmap = [];
+// beatmaps for duel mode
+const beatmap1 = [];
+const beatmap2 = [];
 
 let beatmapIndex = 0;
 let lastLane = 0;
 let totalPossibleScore = 0;
+// beatmap indices for duel mode
+let beatmapIndex1 = 0;
+let beatmapIndex2 = 0;
+let lastLane1 = 0;
+let lastLane2 = 0;
 function gameCreate() {
   const s = this;
   // reset runtime state (useful when scene restarts)
@@ -403,13 +140,17 @@ function gameCreate() {
   beatmapIndex = 0;
   lastLane = 0;
   totalPossibleScore = 0;
+  beatmapIndex1 = 0;
+  beatmapIndex2 = 0;
+  lastLane1 = 0;
+  lastLane2 = 0;
   g = s.add.graphics();
   halfWidth = (cfg.width - separatorWidth) / 2;
   laneW = halfWidth / lanes;
 
   // UI
   scoreText1 = s.add.text(16, 16, 'P1: 0', { font: '20px Arial', fill: '#66ff66' });
-  if (!singlePlayer) {
+  if (!singlePlayer || beatmapDuel) {
     scoreText2 = s.add.text(800 - 16, 16, 'P2: 0', { font: '20px Arial', fill: '#66b3ff' }).setOrigin(1, 0);
   }
   // place title at top and difficulty text slightly below it
@@ -418,12 +159,38 @@ function gameCreate() {
   // Hit guides
   s.input.keyboard.on('keydown', (ev) => {
     if (!running) { if (ev.key.toLowerCase() === 'r') s.scene.restart(); return; }
-    keysDown[ev.key.toLowerCase()] = true;
+    let key = ev.key.toLowerCase();
+
+    // Map arcade controls to keyboard keys (additive, don't replace existing)
+    const arcadeMap = {
+      // Player 1 arcade controls
+      'p1a': 'a', 'p1b': 's', 'p1c': 'd', 'p1x': 'f',
+      // Player 2 arcade controls  
+      'p2a': 'h', 'p2b': 'j', 'p2c': 'k', 'p2x': 'l'
+    };
+
+    if (arcadeMap[key]) {
+      key = arcadeMap[key];
+    }
+
+    keysDown[key] = true;
     checkMultiHits(notes1, 0);
-    if (!singlePlayer) checkMultiHits(notes2, 1);
+    if (!singlePlayer || beatmapDuel) checkMultiHits(notes2, 1);
   });
   s.input.keyboard.on('keyup', (ev) => {
-    keysDown[ev.key.toLowerCase()] = false;
+    let key = ev.key.toLowerCase();
+
+    // Map arcade controls to keyboard keys
+    const arcadeMap = {
+      'p1a': 'a', 'p1b': 's', 'p1c': 'd', 'p1x': 'f',
+      'p2a': 'h', 'p2b': 'j', 'p2c': 'k', 'p2x': 'l'
+    };
+
+    if (arcadeMap[key]) {
+      key = arcadeMap[key];
+    }
+
+    keysDown[key] = false;
   });
 
   // Allow returning to menu with ESC
@@ -449,6 +216,43 @@ function gameCreate() {
       });
     }
     scheduleBeatmapNote(0);
+  } else if (beatmapDuel) {
+    // calculate total possible score for both players
+    const score1Total = beatmap1.reduce((sum, [t, f, c]) => {
+      if (c === 3) return sum + 200;
+      if (c === 4) return sum + 300;
+      return sum + 100;
+    }, 0);
+    const score2Total = beatmap2.reduce((sum, [t, f, c]) => {
+      if (c === 3) return sum + 200;
+      if (c === 4) return sum + 300;
+      return sum + 100;
+    }, 0);
+    totalPossibleScore = Math.max(score1Total, score2Total);
+
+    // schedule beatmap notes for both players
+    function scheduleBeatmapNote1(index) {
+      if (index >= beatmap1.length) return;
+      const [time, freq, change] = beatmap1[index];
+      s.time.delayedCall(time, () => {
+        spawnBeatmapNoteForPlayer(freq, change, 0, lastLane1);
+        if (change === 2) lastLane1 = Math.floor(Math.random() * lanes);
+        beatmapIndex1 = index + 1;
+        scheduleBeatmapNote1(index + 1);
+      });
+    }
+    function scheduleBeatmapNote2(index) {
+      if (index >= beatmap2.length) return;
+      const [time, freq, change] = beatmap2[index];
+      s.time.delayedCall(time, () => {
+        spawnBeatmapNoteForPlayer(freq, change, 1, lastLane2);
+        if (change === 2) lastLane2 = Math.floor(Math.random() * lanes);
+        beatmapIndex2 = index + 1;
+        scheduleBeatmapNote2(index + 1);
+      });
+    }
+    scheduleBeatmapNote1(0);
+    scheduleBeatmapNote2(0);
   } else {
     // dynamic spawn scheduling (uses current spawnRate so we can change it)
     function scheduleSpawn() {
@@ -491,7 +295,7 @@ function gameCreate() {
   for (let i = 0; i < lanes; i++) {
     const x1 = i * laneW + laneW / 2;
     labelTexts1[i] = s.add.text(x1, labelY, keysP1[i], { font: '18px Arial', fill: '#99ff99' }).setOrigin(0.5, 0.5);
-    if (!singlePlayer) {
+    if (!singlePlayer || beatmapDuel) {
       const x2 = halfWidth + separatorWidth + i * laneW + laneW / 2;
       labelTexts2[i] = s.add.text(x2, labelY, keysP2[i], { font: '18px Arial', fill: '#99ddff' }).setOrigin(0.5, 0.5);
     }
@@ -520,18 +324,20 @@ function spawn(arr, side, isMulti = false, count = 2) {
   if (singlePlayer) maxPossibleScore += 100 * lanesForNote.length;
 }
 
-function spawnBeatmapNote(freq, change) {
+function spawnBeatmapNoteForPlayer(freq, change, side, lastLaneRef) {
   if (!running) return;
   let lanesForNote = [];
   if (change === 1) {
-    lanesForNote = [lastLane];
+    lanesForNote = [lastLaneRef];
   } else if (change === 2) {
     let newLane;
     do {
       newLane = Math.floor(Math.random() * lanes);
-    } while (newLane === lastLane);
+    } while (newLane === lastLaneRef);
     lanesForNote = [newLane];
-    lastLane = newLane;
+    // Update the caller's lastLane
+    if (side === 0) lastLane1 = newLane;
+    else lastLane2 = newLane;
   } else if (change === 3) {
     // double: 2 random lanes
     const available = [0, 1, 2, 3];
@@ -547,9 +353,10 @@ function spawnBeatmapNote(freq, change) {
       lanesForNote.push(available.splice(idx, 1)[0]);
     }
   }
-  const baseX = 0; // left side
+  const baseX = side === 0 ? 0 : halfWidth + separatorWidth;
   const x = baseX + lanesForNote[0] * laneW + laneW / 2 - Math.floor(noteWidth / 2);
-  notes1.push({ x: x, y: -30, lanes: lanesForNote, side: 0, hit: false, freq: freq });
+  const targetArray = side === 0 ? notes1 : notes2;
+  targetArray.push({ x: x, y: -30, lanes: lanesForNote, side: side, hit: false, freq: freq });
 }
 
 function gameUpdate(_, dt) {
@@ -563,6 +370,12 @@ function gameUpdate(_, dt) {
   if (singlePlayer) {
     // check if beatmap finished and no notes left
     if (beatmapIndex >= beatmap.length && notes1.length === 0) {
+      endSong(scene);
+      return;
+    }
+  } else if (beatmapDuel) {
+    // check if both beatmaps finished and no notes left
+    if (beatmapIndex1 >= beatmap1.length && beatmapIndex2 >= beatmap2.length && notes1.length === 0 && notes2.length === 0) {
       endSong(scene);
       return;
     }
@@ -586,7 +399,7 @@ function gameUpdate(_, dt) {
 function draw() {
   g.clear();
   // background lanes
-  for (let side = 0; side < (singlePlayer ? 1 : 2); side++) {
+  for (let side = 0; side < (singlePlayer && !beatmapDuel ? 1 : 2); side++) {
     const baseX = side === 0 ? 0 : halfWidth + separatorWidth;
     for (let i = 0; i < lanes; i++) {
       const x = baseX + i * laneW;
@@ -598,7 +411,7 @@ function draw() {
   }
 
   // separator lane in the middle (filled only — no stroke to avoid artifact line)
-  if (!singlePlayer) {
+  if (!singlePlayer || beatmapDuel) {
     g.fillStyle(0x081424, 1); g.fillRect(halfWidth, 60, separatorWidth, cfg.height - 140);
   }
 
@@ -607,7 +420,7 @@ function draw() {
   for (let i = 0; i < lanes; i++) {
     const bx1 = 0 + i * laneW + 4;
     g.fillStyle(0x003300, 0.6); g.fillRect(bx1, barY, Math.max(8, laneW - 8), 10);
-    if (!singlePlayer) {
+    if (!singlePlayer || beatmapDuel) {
       const bx2 = halfWidth + separatorWidth + i * laneW + 4;
       g.fillStyle(0x002244, 0.6); g.fillRect(bx2, barY, Math.max(8, laneW - 8), 10);
     }
@@ -620,7 +433,7 @@ function draw() {
       g.fillStyle(0xffcc33, 1); g.fillRect(nx, n.y, noteWidth, 20);
     });
   });
-  if (!singlePlayer) {
+  if (!singlePlayer || beatmapDuel) {
     notes2.forEach(n => {
       n.lanes.forEach(lane => {
         const nx = (n.side === 0 ? 0 : halfWidth + separatorWidth) + lane * laneW + laneW / 2 - Math.floor(noteWidth / 2);
@@ -684,14 +497,24 @@ function endSong(s) {
   // evitar ejecutar dos veces
   if (!running) return;
   running = false; const overlay = s.add.graphics(); overlay.fillStyle(0x000000, 0.6); overlay.fillRect(0, 0, cfg.width, cfg.height);
-  const percentage = singlePlayer ? (score1 / totalPossibleScore) * 100 : 0;
-  const winner = singlePlayer ? (
-    percentage > 92 ? 'PERFECT CLEAR' :
-      percentage > 50 ? 'YOU WIN!' :
-        'YOU LOSE'
-  ) : (score1 === score2 ? 'TIE' : (score1 > score2 ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS'));
+
+  let winner, scoreText;
+  if (beatmapDuel) {
+    const percentage1 = (score1 / totalPossibleScore) * 100;
+    const percentage2 = (score2 / totalPossibleScore) * 100;
+    winner = percentage1 === percentage2 ? 'TIE' : (percentage1 > percentage2 ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS');
+    scoreText = 'P1: ' + score1 + ' (' + percentage1.toFixed(1) + '%)   P2: ' + score2 + ' (' + percentage2.toFixed(1) + '%)';
+  } else {
+    const percentage = singlePlayer ? (score1 / totalPossibleScore) * 100 : 0;
+    winner = singlePlayer ? (
+      percentage > 92 ? 'PERFECT CLEAR' :
+        percentage > 50 ? 'YOU WIN!' :
+          'YOU LOSE'
+    ) : (score1 === score2 ? 'TIE' : (score1 > score2 ? 'PLAYER 1 WINS' : 'PLAYER 2 WINS'));
+    scoreText = singlePlayer ? 'Score: ' + score1 + ' / ' + totalPossibleScore + ' (' + percentage.toFixed(1) + '%)' : 'P1: ' + score1 + '   P2: ' + score2;
+  }
+
   endText = s.add.text(cfg.width / 2, 270, winner, { font: '40px Arial', fill: '#ffffff' }).setOrigin(0.5);
-  const scoreText = singlePlayer ? 'Score: ' + score1 + ' / ' + totalPossibleScore + ' (' + percentage.toFixed(1) + '%)' : 'P1: ' + score1 + '   P2: ' + score2;
   s.add.text(cfg.width / 2, 330, scoreText, { font: '26px Arial', fill: '#ffd966' }).setOrigin(0.5);
   s.add.text(cfg.width / 2, 390, 'Press R to Restart', { font: '20px Arial', fill: '#99ff99' }).setOrigin(0.5);
   playToneForSide(0, 440, 0.2); playToneForSide(1, 330, 0.2);
@@ -723,3 +546,7 @@ function playSingleTone(ctx, freq, dur) {
   o.start(ctx.currentTime);
   o.stop(ctx.currentTime + dur);
 }
+
+// Initialize beatmaps for duel mode (using the same beatmap for both players for now)
+beatmap1.push(...beatmap);
+beatmap2.push(...beatmap);
