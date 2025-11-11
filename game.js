@@ -133,7 +133,137 @@ const baseMultiProb = 0.1;
 let singlePlayer = false;
 let beatmapDuel = false;
 // beatmap for single player: [time_ms, frequency_hz, change_type]
-const beatmap = [];
+const beatmap = [
+  [4, [294, 370, 123], 3],
+  [509, [370, 440], 2],
+  [246, [440, 554], 2],
+  [498, [370, 440], 2],
+  [493, [294, 370], 2],
+  [249, [294, 208], 2],
+  [264, [294, 208], 1],
+  [248, [294, 208], 1],
+  [1237, [277, 175], 2],
+  [249, [294, 123, 185], 3],
+  [264, [294, 370], 2],
+  [248, [370, 440], 2],
+  [246, [440, 554], 2],
+  [498, [370, 440], 2],
+  [493, [294, 370], 2],
+  [249, [330, 415, 659, 208], 4],
+  [759, [311, 392, 622, 196], 4],
+  [249, [294, 370, 587, 185], 4],
+  [991, [415, 110], 2],
+  [512, [554, 277, 330], 3],
+  [246, 370, 2],
+  [498, [554, 165], 2],
+  [493, [415, 208], 2],
+  [514, [554, 277, 330], 3],
+  [494, [392, 196], 2],
+  [249, [370, 185], 2],
+  [495, [330, 277], 2],
+  [496, [185, 262, 73], 3],
+  [264, [185, 262, 73], 1],
+  [248, [185, 262, 73], 1],
+  [991, [185, 262, 73], 1],
+  [246, [185, 262, 73], 1],
+  [249, [185, 262, 73], 1],
+  [1008, [208, 247, 311], 3],
+  [495, [196, 233, 294], 3],
+  [496, [294, 370, 185, 220, 277], 4],
+  [512, [370, 440], 2],
+  [246, [440, 554], 2],
+  [498, [370, 440], 2],
+  [493, [311, 370, 294], 3],
+  [249, [330, 208, 294], 3],
+  [264, [330, 208, 294], 1],
+  [248, [330, 208, 294], 1],
+  [495, [415, 659], 2],
+  [249, [415, 659], 1],
+  [246, [415, 659], 1],
+  [496, 123, 2],
+  [264, [294, 370], 2],
+  [248, [370, 440], 2],
+  [246, [440, 554], 2],
+  [499, [370, 440], 2],
+  [503, [294, 370], 2],
+  [258, [330, 415, 554, 165], 4],
+  [1013, [294, 370, 494, 147], 4],
+  [991, [494, 165], 2],
+  [264, 392, 2],
+  [248, [294, 247], 2],
+  [246, [277, 110], 2],
+  [498, [494, 220, 277], 3],
+  [246, 392, 2],
+  [246, 277, 2],
+  [249, [440, 147], 2],
+  [264, 370, 2],
+  [248, [262, 220], 2],
+  [246, [247, 98], 2],
+  [498, [349, 196, 247], 3],
+  [246, 294, 2],
+  [246, 247, 2],
+  [249, [185, 277, 123, 165], 4],
+  [264, [185, 277, 123, 165], 1],
+  [248, [185, 277, 123, 165], 1],
+  [1237, [466, 139], 2],
+  [249, [494, 147], 2],
+  [264, [554, 196], 2],
+  [248, [587, 208], 2],
+  [246, [740, 277], 2],
+  [249, [880, 392], 2],
+  [2000, 220, 2],
+  [495, 233, 2],
+  [496, [247, 165], 2],
+  [512, [165, 196], 2],
+  [246, [233, 123], 2],
+  [249, 247, 2],
+  [249, [165, 196], 2],
+  [742, 110, 2],
+  [264, [165, 196], 2],
+  [248, 220, 2],
+  [246, [233, 165], 2],
+  [249, 247, 2],
+  [249, 370, 2],
+  [246, [185, 196, 247], 4],
+  [246, 277, 2],
+  [249, [247, 147], 2],
+  [512, [185, 220], 2],
+  [246, [233, 110], 2],
+  [249, 247, 2],
+  [249, [185, 220], 2],
+  [493, 139, 2],
+  [249, 147, 2],
+  [264, [185, 220], 2],
+  [494, 110, 2],
+  [249, 247, 2],
+  [495, [262, 185, 220], 3],
+  [496, [277, 92], 2],
+  [512, [156, 247], 2],
+  [246, [262, 139], 2],
+  [249, 277, 2],
+  [249, [139, 233], 2],
+  [493, 87, 2],
+  [249, 92, 2],
+  [264, [139, 233], 2],
+  [248, 277, 2],
+  [246, [262, 69], 2],
+  [249, 277, 2],
+  [249, 415, 2],
+  [246, [139, 233], 2],
+  [246, 311, 2],
+  [249, [277, 92], 2],
+  [512, [185, 220], 2],
+  [246, [311, 123], 2],
+  [249, 247, 2],
+  [249, [185, 220], 2],
+  [493, 277, 2],
+  [249, [294, 82], 2],
+  [264, [370, 440], 2],
+  [494, 294, 2],
+  [249, [330, 415, 139, 247], 4],
+  [249, [330, 415, 139, 247], 1],
+  [246, [330, 415, 139, 247], 1],
+];
 // beatmaps for duel mode
 const beatmap1 = [];
 const beatmap2 = [];
@@ -146,6 +276,9 @@ let beatmapIndex1 = 0;
 let beatmapIndex2 = 0;
 let lastLane1 = 0;
 let lastLane2 = 0;
+// last lanes arrays to allow repeating multi-lane notes when change=1
+let lastLanes1 = [0];
+let lastLanes2 = [0];
 function gameCreate() {
   const s = this;
   // reset runtime state (useful when scene restarts)
@@ -223,19 +356,28 @@ function gameCreate() {
   });
 
   if (singlePlayer) {
-    // calculate total possible score
-    totalPossibleScore = beatmap.reduce((sum, [t, f, c]) => {
-      if (c === 3) return sum + 200;
-      if (c === 4) return sum + 300;
-      return sum + 100;
-    }, 0);
+    // calculate total possible score (handle repeats change===1 and arrays)
+    totalPossibleScore = 0;
+    let lastNumNotes = 1;
+    for (let i = 0; i < beatmap.length; i++) {
+      const [, f, c] = beatmap[i];
+      let numNotes = 1;
+      if (c === 1) {
+        // repeat: use previous known number of notes
+        numNotes = lastNumNotes || 1;
+      } else {
+        numNotes = c - 1; // single=2, double=3, triple=4
+      }
+      lastNumNotes = numNotes;
+      totalPossibleScore += 100 * numNotes;
+    }
     // schedule beatmap notes
     function scheduleBeatmapNote(index) {
       if (index >= beatmap.length) return;
       const [time, freq, change] = beatmap[index];
       s.time.delayedCall(time, () => {
-        spawnBeatmapNoteForPlayer(freq, change, 0, lastLane);
-        if (change === 2) lastLane = Math.floor(Math.random() * lanes);
+        // spawn note and let spawnBeatmapNoteForPlayer manage lastLanes updates
+        spawnBeatmapNoteForPlayer(freq, change, 0);
         beatmapIndex = index + 1;
         scheduleBeatmapNote(index + 1);
       });
@@ -243,16 +385,21 @@ function gameCreate() {
     scheduleBeatmapNote(0);
   } else if (beatmapDuel) {
     // calculate total possible score for both players
-    const score1Total = beatmap1.reduce((sum, [t, f, c]) => {
-      if (c === 3) return sum + 200;
-      if (c === 4) return sum + 300;
-      return sum + 100;
-    }, 0);
-    const score2Total = beatmap2.reduce((sum, [t, f, c]) => {
-      if (c === 3) return sum + 200;
-      if (c === 4) return sum + 300;
-      return sum + 100;
-    }, 0);
+    const computeMax = (bm) => {
+      let s = 0; let lastNum = 1;
+      for (let i = 0; i < bm.length; i++) {
+        const [, f, c] = bm[i];
+        let n = 1;
+        if (Array.isArray(f)) n = f.length;
+        else if (c === 1) n = lastNum || 1;
+        else n = 1;
+        lastNum = n;
+        s += 100 * n;
+      }
+      return s;
+    };
+    const score1Total = computeMax(beatmap1);
+    const score2Total = computeMax(beatmap2);
     totalPossibleScore = Math.max(score1Total, score2Total);
 
     // schedule beatmap notes for both players
@@ -260,8 +407,8 @@ function gameCreate() {
       if (index >= beatmap1.length) return;
       const [time, freq, change] = beatmap1[index];
       s.time.delayedCall(time, () => {
-        spawnBeatmapNoteForPlayer(freq, change, 0, lastLane1);
-        if (change === 2) lastLane1 = Math.floor(Math.random() * lanes);
+        // spawn note and let spawnBeatmapNoteForPlayer manage lastLanes updates
+        spawnBeatmapNoteForPlayer(freq, change, 0);
         beatmapIndex1 = index + 1;
         scheduleBeatmapNote1(index + 1);
       });
@@ -270,8 +417,8 @@ function gameCreate() {
       if (index >= beatmap2.length) return;
       const [time, freq, change] = beatmap2[index];
       s.time.delayedCall(time, () => {
-        spawnBeatmapNoteForPlayer(freq, change, 1, lastLane2);
-        if (change === 2) lastLane2 = Math.floor(Math.random() * lanes);
+        // spawn note and let spawnBeatmapNoteForPlayer manage lastLanes updates
+        spawnBeatmapNoteForPlayer(freq, change, 1);
         beatmapIndex2 = index + 1;
         scheduleBeatmapNote2(index + 1);
       });
@@ -349,20 +496,23 @@ function spawn(arr, side, isMulti = false, count = 2) {
   if (singlePlayer) maxPossibleScore += 100 * lanesForNote.length;
 }
 
-function spawnBeatmapNoteForPlayer(freq, change, side, lastLaneRef) {
+function spawnBeatmapNoteForPlayer(freq, change, side) {
   if (!running) return;
   let lanesForNote = [];
+  // Choose which lastLanes array to use
+  const lastLanesRef = side === 0 ? lastLanes1 : lastLanes2;
   if (change === 1) {
-    lanesForNote = [lastLaneRef];
+    // repeat previous lanes (works for single, double or triple)
+    lanesForNote = lastLanesRef.slice();
   } else if (change === 2) {
+    // single, choose a new lane different from previous primary lane
     let newLane;
+    const prevPrimary = lastLanesRef && lastLanesRef.length ? lastLanesRef[0] : -1;
     do {
       newLane = Math.floor(Math.random() * lanes);
-    } while (newLane === lastLaneRef);
+    } while (newLane === prevPrimary);
     lanesForNote = [newLane];
-    // Update the caller's lastLane
-    if (side === 0) lastLane1 = newLane;
-    else lastLane2 = newLane;
+    if (side === 0) lastLanes1 = lanesForNote.slice(); else lastLanes2 = lanesForNote.slice();
   } else if (change === 3) {
     // double: 2 random lanes
     const available = [0, 1, 2, 3];
@@ -370,6 +520,7 @@ function spawnBeatmapNoteForPlayer(freq, change, side, lastLaneRef) {
       const idx = Math.floor(Math.random() * available.length);
       lanesForNote.push(available.splice(idx, 1)[0]);
     }
+    if (side === 0) lastLanes1 = lanesForNote.slice(); else lastLanes2 = lanesForNote.slice();
   } else if (change === 4) {
     // triple: 3 random lanes
     const available = [0, 1, 2, 3];
@@ -377,6 +528,7 @@ function spawnBeatmapNoteForPlayer(freq, change, side, lastLaneRef) {
       const idx = Math.floor(Math.random() * available.length);
       lanesForNote.push(available.splice(idx, 1)[0]);
     }
+    if (side === 0) lastLanes1 = lanesForNote.slice(); else lastLanes2 = lanesForNote.slice();
   }
   const baseX = side === 0 ? 0 : halfWidth + separatorWidth;
   const x = baseX + lanesForNote[0] * laneW + laneW / 2 - Math.floor(noteWidth / 2);

@@ -70,18 +70,25 @@ def main():
         next_num = len(chords[i+1][1]) if i < len(chords)-1 else 0
 
         # Determine change_type
-        if num_notes == 1 or num_notes == 2:
-            change_type = 2 if i > 0 else 1
-        elif num_notes == 3:
-            if prev_num == 1 and next_num == 1:
-                change_type = 4  # triple
-            else:
-                change_type = 3  # double
+        # If this chord is identical to previous chord, mark as 1 (repeat)
+        if i > 0 and sorted(notes) == sorted(chords[i-1][1]):
+            change_type = 1
         else:
-            change_type = 4  # for more than 3, triple
+            if num_notes == 1 or num_notes == 2:
+                change_type = 2 if i > 0 else 1
+            elif num_notes == 3:
+                if prev_num == 1 and next_num == 1:
+                    change_type = 4  # triple
+                else:
+                    change_type = 3  # double
+            else:
+                change_type = 4  # for more than 3, triple
 
-        # For freq, use list if change_type > 1, else single
-        freq = freqs if change_type > 1 else freqs[0]
+        # For freq, use list if the chord has multiple notes (so repeats keep full chord), else single value
+        if len(freqs) > 1:
+            freq = freqs
+        else:
+            freq = freqs[0]
 
         beatmap.append([int(delta_time), freq, change_type])
 
